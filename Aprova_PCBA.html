@@ -335,6 +335,111 @@ async function saveConcursos(){
 }
 const emptyDataset=()=>({plano:[],fds:[],dicas:[],cobertura:[],disciplinas:[]});
 
+const TEMAS_DISCURSIVAS_AOCP = [
+  {
+    titulo: 'Tema 01 — Estatuto do Desarmamento (Lei nº 10.826/2003)',
+    tipo: 'Peça Prática',
+    data: '2026-08-08',
+    enunciado: `O Estatuto do Desarmamento (Lei nº 10.826/2003) estabeleceu regras rígidas para o registro, a posse e a comercialização de armas de fogo e munições no Brasil, visando proteger a incolumidade pública. Na atividade de polícia judiciária, a correta tipificação das condutas envolvendo armamentos é essencial para a elaboração do inquérito policial e para a garantia da segurança jurídica na responsabilização penal dos infratores.
+Com base no texto motivador e na legislação pertinente, elabore um texto dissertativo abordando, obrigatoriamente, os seguintes tópicos:
+1) A distinção legal entre a posse irregular e o porte ilegal de arma de fogo.
+2) A diferença de tratamento penal conferido aos crimes envolvendo armamentos de uso permitido em relação aos de uso restrito ou proibido.
+3) O alcance da abolitio criminis temporalis (anistia temporária) prevista no Estatuto do Desarmamento.`
+  },
+  {
+    titulo: 'Tema 02 — Marco Legal de Combate ao Crime Organizado (Lei nº 12.850/2013)',
+    tipo: 'Peça Prática',
+    data: '2026-08-08',
+    enunciado: `A criminalidade organizada apresenta-se como um dos maiores desafios à segurança pública e à estabilidade do Estado Democrático de Direito contemporâneo. Para enfrentar estruturas delituosas cada vez mais complexas, compartimentadas e dotadas de alto poderio econômico, o ordenamento jurídico brasileiro passou por necessárias transformações. Nesse cenário, a Lei nº 12.850/2013 representou um marco normativo essencial, superando antigas lacunas legais ao estabelecer definições precisas e regulamentar meios especiais de obtenção de prova, indispensáveis para a atuação eficaz e moderna da Polícia Judiciária.
+Com base na leitura do texto motivador e em seus conhecimentos sobre a legislação penal e processual penal vigente, redija um texto dissertativo acerca do Marco Legal de Combate ao Crime Organizado no Brasil (Lei nº 12.850/2013 e suas alterações).
+Aborde, obrigatoriamente e de forma fundamentada, os seguintes tópicos:
+1. O conceito legal de organização criminosa, destacando os seus requisitos objetivos e subjetivos indispensáveis para a sua caracterização.
+2. A colaboração premiada: disserte sobre a sua natureza jurídica e explique a legitimidade e os limites de atuação do Delegado de Polícia na proposição e formalização do acordo.
+3. A infiltração de agentes policiais como meio de obtenção de prova: explique os requisitos legais exigidos para a sua decretação e quais são os limites penais da atuação do policial infiltrado durante a operação.`
+  },
+  {
+    titulo: 'Tema 03 — Desistência Voluntária e Arrependimento Eficaz',
+    tipo: 'Questão Discursiva',
+    data: '2026-08-15',
+    enunciado: `O Direito Penal, orientado por diretrizes de política criminal que buscam a proteção do bem jurídico e a minimização de danos, estabelece estímulos para que o agente criminoso retroceda em sua conduta ofensiva. O célebre jurista Franz von Liszt denominou tais institutos de "pontes de ouro", uma vez que o legislador oferece uma saída benéfica ao autor que, no decorrer do iter criminis, muda de ideia e atua para evitar a consumação do delito. O estudo dessas figuras é essencial para a escorreita tipificação da conduta na fase de investigação policial.
+Com base na leitura do texto motivador e em seus conhecimentos de Direito Penal (Parte Geral), redija um texto dissertativo acerca dos institutos da Desistência Voluntária e do Arrependimento Eficaz.
+Responda aos seguintes tópicos:
+1. O conceito e a distinção exata entre desistência voluntária e arrependimento eficaz, indicando em qual fase do iter criminis cada um desses institutos se manifesta.
+2. Explique a diferença entre conduta "voluntária" e "espontânea" para fins de aplicação da norma, e utilize a Fórmula de Frank para diferenciar a desistência voluntária da figura da tentativa.
+3. As consequências jurídicas para o agente que atua sob o manto da desistência voluntária ou do arrependimento eficaz, diferenciando brevemente esses efeitos daqueles aplicáveis ao instituto do arrependimento posterior.`
+  },
+  {
+    titulo: 'Tema 04 — Concurso de Crimes (Parte Geral do Código Penal)',
+    tipo: 'Questão Discursiva',
+    data: '2026-08-15',
+    enunciado: `A dinâmica delitiva no mundo real raramente se apresenta de forma simples e isolada. É frequente que a atuação criminosa envolva uma pluralidade de condutas ou a produção de múltiplos resultados lesivos, atingindo bens jurídicos diversos. Para o escorreito trabalho da Polícia Judiciária e a posterior aplicação de uma pena justa e proporcional ao autor, o legislador penal estabeleceu regras específicas para o tratamento dessas situações, adotando diferentes sistemas de dosimetria (cúmulo material e exasperação) a depender da forma como os delitos se relacionam no caso concreto.
+Com base na leitura do texto motivador e em seus conhecimentos de Direito Penal, redija um texto dissertativo acerca do Concurso de Crimes.
+Responda aos seguintes tópicos:
+1. Diferencie o concurso material do concurso formal, explicando como ocorre a aplicação da pena para cada um desses institutos.
+2. Discorra sobre o crime continuado indicando os requisitos objetivos exigidos por lei para a sua configuração e explicando qual foi a teoria adotada pelo Código Penal brasileiro para justificar a sua existência.`
+  },
+  {
+    titulo: 'Tema 05 — Lei de Proteção a Vítimas e Testemunhas (Lei nº 9.807/1999)',
+    tipo: 'Estudo de Caso',
+    data: '2026-08-22',
+    enunciado: `A eficácia da persecução penal, especialmente no enfrentamento à criminalidade violenta e às organizações criminosas, depende em grande medida da colaboração de vítimas e testemunhas. Contudo, o receio constante de represálias e coações frequentemente impõe a "lei do silêncio", inviabilizando a elucidação dos delitos. Reconhecendo o dever inafastável do Estado de resguardar a vida e a integridade daqueles que colaboram com a Justiça, o ordenamento jurídico brasileiro instituiu programas de proteção, instrumentos indispensáveis para assegurar tanto os direitos fundamentais do cidadão quanto a busca pela verdade real no processo penal.
+Com base na leitura do texto motivador e em seus conhecimentos sobre a legislação penal e processual penal extravagante, redija um texto dissertativo acerca da Lei de Proteção a Vítimas e Testemunhas (Lei nº 9.807/1999).
+Responda aos seguintes tópicos:
+1. Os requisitos legais para o ingresso de uma pessoa no programa de proteção, explicando como funciona o princípio da voluntariedade e indicando ao menos duas causas previstas em lei que acarretam a exclusão do indivíduo do programa.
+2. As medidas de proteção aplicáveis pelo conselho deliberativo, detalhando, em especial, os contornos jurídicos (requisitos e caráter temporário ou definitivo) aplicáveis à medida extrema de alteração do nome completo e dos dados de qualificação civil da pessoa protegida.`
+  },
+  {
+    titulo: 'Tema 06 — Procedimento Comum Penal (Ordinário, Sumário e Sumaríssimo)',
+    tipo: 'Questão Discursiva',
+    data: '2026-08-22',
+    enunciado: `O princípio constitucional do devido processo legal impõe que a persecução penal em juízo obedeça a ritos preestabelecidos, garantindo às partes previsibilidade, segurança jurídica e o pleno exercício do contraditório e da ampla defesa. Contudo, a marcha processual não deve ser idêntica para todas as infrações. Visando conferir celeridade à Justiça e adequar a complexidade dos atos processuais à gravidade do delito investigado, a legislação processual penal brasileira escalonou o procedimento comum em diferentes modalidades, orientando-se, primordialmente, pela sanção máxima em abstrato cominada ao tipo penal.
+Com base na leitura do texto motivador e em seus conhecimentos de Direito Processual Penal, redija um texto dissertativo acerca do Procedimento Comum Penal e suas modalidades (Ordinário, Sumário e Sumaríssimo).
+Em sua redação, disserte sobre o critério quantitativo adotado pela legislação para a fixação de cada um desses ritos (indicando os parâmetros de pena máxima em abstrato) e aborde as principais características e diferenças estruturais entre eles, destacando obrigatoriamente a competência jurisdicional e a limitação legal do número de testemunhas para cada rito.`
+  },
+  {
+    titulo: 'Tema 07 — Sursis Penal vs Livramento Condicional',
+    tipo: 'Questão Discursiva',
+    data: '2026-08-29',
+    enunciado: `O sistema penal brasileiro, orientado pelos princípios da humanidade e da individualização da pena, estabelece mecanismos legais que buscam evitar o encarceramento desnecessário e promover a reintegração social gradativa do apenado. Nesse contexto, a política criminal adotou institutos descarcerizadores como a suspensão condicional da pena e o livramento condicional. Embora ambos exijam o cumprimento de condições impostas pelo juízo e representem um voto de confiança do Estado no sentenciado, tratam-se de institutos com naturezas, momentos de aplicação e requisitos legais sensivelmente distintos.
+Com base na leitura do texto motivador e em seus conhecimentos de Direito Penal (Parte Geral), redija um texto dissertativo acerca dos institutos da Suspensão Condicional da Pena (Sursis) e do Livramento Condicional.
+Em sua redação, aborde, obrigatoriamente e de forma fundamentada, os seguintes tópicos:
+1. A distinção fundamental entre a suspensão condicional da pena e o livramento condicional, explicando em qual momento cada um é concedido (fase de conhecimento ou execução) e qual é o limite objetivo de pena (quantidade máxima de pena aplicada) exigido para a concessão da regra geral do sursis.
+2. Os requisitos objetivos para a concessão do livramento condicional, detalhando as diferentes frações de cumprimento de pena estipuladas pelo Código Penal para: condenados não reincidentes em crime doloso e com bons antecedentes; condenados reincidentes em crime doloso; e condenados por crimes hediondos ou equiparados.`
+  },
+  {
+    titulo: 'Tema 08 — Crimes contra a Dignidade Sexual',
+    tipo: 'Peça Prática',
+    data: '2026-08-29',
+    enunciado: `A tutela penal da dignidade sexual sofreu profundas e necessárias modificações no ordenamento jurídico brasileiro ao longo das últimas décadas. O legislador deixou de focar nos "costumes" para proteger, efetivamente, a liberdade, a intimidade e o desenvolvimento sexual do indivíduo. Leis recentes, como a Lei nº 12.015/2009 e a Lei nº 13.718/2018, modernizaram o Título VI do Código Penal, tipificando novas condutas e recrudescendo o tratamento conferido aos crimes sexuais. Esse cenário exige da Polícia Judiciária uma atuação técnica, rigorosa e precisa na correta adequação típica durante a investigação criminal.
+Com base na leitura do texto motivador e em seus conhecimentos de Direito Penal (Parte Especial), redija um texto dissertativo acerca dos Crimes contra a Dignidade Sexual.
+Em sua redação, aborde, obrigatoriamente e de forma fundamentada, os seguintes tópicos:
+1. Diferencie o crime de estupro do crime de estupro de vulnerável (art. 217-A do CP), explicando o papel da violência (ou grave ameaça) e a relevância jurídica do consentimento da vítima para a configuração de cada uma dessas infrações penais.
+2. Estabeleça a distinção jurídica exata entre os delitos de assédio sexual (art. 216-A do CP) e importunação sexual (art. 215-A do CP), destacando qual é o requisito elementar de relação laboral exigido por um deles e a finalidade de satisfação da lascívia presente no outro.`
+  },
+  {
+    titulo: 'Tema 09 — Meios de Prova e Obtenção de Prova (Busca e Apreensão Cautelar)',
+    tipo: 'Portaria de IP',
+    data: '2026-09-05',
+    enunciado: `A persecução penal em um Estado Democrático de Direito exige que a reconstrução histórica dos fatos delituosos ocorra sob o estrito amparo da legalidade. Nesse cenário, o legislador processual penal estabelece instrumentos investigativos distintos para subsidiar a convicção do julgador. A correta compreensão e a aplicação técnica das ferramentas legais durante a fase inquisitorial pela Polícia Judiciária são essenciais para evitar a contaminação da cadeia probatória e garantir a eficácia da investigação, respeitando-se sempre as garantias constitucionais fundamentais do investigado.
+Com base na leitura do texto motivador e em seus conhecimentos de Direito Processual Penal e de legislação extravagante, redija um texto dissertativo acerca do tema: Meios de Prova e Meios de Obtenção de Prova em Espécie.
+Em sua redação, aborde, obrigatoriamente e de forma fundamentada, os seguintes tópicos:
+1. A distinção doutrinária e jurídica exata entre "meio de prova" e "meio de obtenção de prova", citando ao menos um exemplo legal de cada instituto que seja aplicável à rotina de investigação da Polícia Judiciária.
+2. Disserte sobre a garantia constitucional da inviolabilidade do domicílio, explicando as hipóteses excepcionais que autorizam o ingresso dos agentes policiais na residência do investigado sem mandado judicial, bem como os requisitos e limites de horário para o cumprimento do mandado de busca expedido pelo juiz.
+3. Indique quais são os três requisitos legais cumulativos indispensáveis para que a autoridade policial possa representar, com legitimidade, pela decretação dessa medida cautelar de obtenção de prova.`
+  },
+  {
+    titulo: 'Tema 10 — Concurso de Pessoas: Autoria, Coautoria e Participação',
+    tipo: 'Peça Prática',
+    data: '2026-09-05',
+    enunciado: `O concurso de pessoas verifica-se quando dois ou mais agentes convergem suas vontades e condutas para a prática de uma mesma infração penal. O Código Penal brasileiro, em seu artigo 29, adotou como regra a teoria monista (ou unitária), estabelecendo que todos que colaboram para o crime incidem nas penas a este cominadas, na medida de sua culpabilidade. Contudo, para a escorreita aplicação da lei, a justa individualização da pena e o preciso indiciamento na fase inquisitorial, a doutrina e a jurisprudência desenvolveram critérios rigorosos para distinguir o autor (ou coautor) da figura do partícipe, bem como para balizar os excessos e os desvios de conduta durante a empreitada criminosa.
+Com base na leitura do texto motivador e em seus conhecimentos de Direito Penal, redija um texto dissertativo acerca do Concurso de Pessoas: Autoria, Coautoria e Participação.
+Responda aos tópicos abaixo:
+1. A distinção técnico-jurídica entre autor e partícipe, explicando os preceitos da Teoria Objetivo-Formal e os fundamentos da Teoria do Domínio do Fato.
+2. Disserte sobre sua aplicabilidade, esclarecendo se ela pode ser reconhecida para a figura do coautor e indicando qual é a consequência jurídica para o agente beneficiado.
+3. Explique a solução adotada pelo legislador para o caso em que um dos concorrentes deseja participar de crime menos grave, esclarecendo como fica a responsabilização penal deste agente caso o resultado mais grave produzido pelo comparsa fosse previsível.`
+  }
+];
+
 async function loadState(){
   DS=CONCURSOS.find(c=>c.id===ACTIVE).data;
   buildDicaMap();
@@ -343,6 +448,7 @@ async function loadState(){
   else{S={config:JSON.parse(JSON.stringify(DEFAULT_CONFIG)),tasks:{},dicas:{},reviews:{},meta:{createdAt:new Date().toISOString()}};}
   // garante campos
   S.tasks=S.tasks||{};S.dicas=S.dicas||{};S.reviews=S.reviews||{};
+  S.discursivas=(S.discursivas&&S.discursivas.length)?S.discursivas:JSON.parse(JSON.stringify(TEMAS_DISCURSIVAS_AOCP));
   S.config=Object.assign(JSON.parse(JSON.stringify(DEFAULT_CONFIG)),S.config);
   S.config.refDate="2026-08-05";
   reprogram(S.config.refDate, true);
@@ -819,8 +925,7 @@ function getWeeklyQuestions(ref){
 
 function viewHoje(){
   const ref=TODAY();const st=stats();
-  const start=DS.plano.length?DS.plano[0].d:ref;
-  const prova=S.config.provaDate;
+  const start = S.config.refDate || '2026-08-05';
   const total=Math.max(1,diffDays(start,prova));
   const elapsed=clamp(diffDays(start,ref),0,total);
   const sunPct=clamp(st.pct,0,100);
@@ -1204,41 +1309,154 @@ function viewCrono(){
     if(cronoFilter.status&&t.status!==cronoFilter.status)return false;
     if(cronoFilter.fase&&t.fase!==cronoFilter.fase)return false;
     return true;});
+  
   // agrupa por data
   const byDate={};tasks.forEach(t=>{(byDate[t.date]=byDate[t.date]||[]).push(t);});
-  const dates=Object.keys(byDate).sort();
+  
+  // Gera intervalo completo de datas do cronograma
   const ref=TODAY();
+  const startDate = S.config.refDate || '2026-08-05';
+  const endDate = S.config.provaDate;
+  const allDates = [];
+  let dCurr = startDate;
+  let guard = 0;
+  while (dCurr <= endDate && guard < 180) {
+    allDates.push(dCurr);
+    dCurr = addDays(dCurr, 1);
+    guard++;
+  }
+
   const opt=(arr,cur)=>arr.map(o=>`<option ${o===cur?'selected':''}>${esc(o)}</option>`).join('');
   let html=`<div class="card" style="margin-bottom:16px"><div class="row" style="flex-wrap:wrap;gap:10px">
     <select data-filter="disc"><option value="">Todas as disciplinas</option>${opt(discs,cronoFilter.disc)}</select>
     <select data-filter="prio"><option value="">Toda prioridade</option>${opt(['MÁXIMA. AOCP','ALTA','MÉDIA','BAIXA'],cronoFilter.prio)}</select>
     <select data-filter="status"><option value="">Todo status</option>${opt(['Não iniciado','Em andamento','Concluído','Adiado','Dispensado'],cronoFilter.status)}</select>
     <select data-filter="fase"><option value="">Toda fase</option>${opt(fases,cronoFilter.fase)}</select>
-    <div class="spacer"></div><span class="muted mono">${tasks.length} blocos</span>
+    <div class="spacer"></div><span class="muted mono">${allDates.length} dias de preparação</span>
   </div></div>`;
+
   html+=`<div class="grid" style="grid-template-columns:1fr;gap:14px">`;
-  for(const d of dates){
-    const arr=byDate[d].sort((a,b)=>({A:0,B:1,C:2}[a.bl]-{A:0,B:1,C:2}[b.bl]));
-    const load=arr.reduce((a,b)=>a+b.min,0);
-    const isToday=d===ref;
-    html+=`<div class="card" style="${isToday?'border-color:var(--cyan)':''}">
+  
+  for(const d of allDates){
+    const dayOfWeek = dow(d);
+    const isToday = d === ref;
+    let dayBlocks = [];
+
+    if (dayOfWeek === 6) { // SÁBADO: REVISÃO SEMANAL & QUESTÕES DISCURSIVAS
+      dayBlocks = [
+        {
+          bl: 'S1', ini: '08:00', fim: '10:30', min: 150,
+          cad: '🔁 SÁBADO — REVISÃO SEMANAL GERAL (Parte 1)',
+          disc: 'Revisão dos Conteúdos Estudados de Segunda a Quinta-feira',
+          it: 'Leitura ativa, síntese e evocação dos conceitos da semana',
+          cods: 'REV-SEM-1', prio: 'MÁXIMA. AOCP', isSpecial: true, tagColor: 'var(--sun)'
+        },
+        {
+          bl: 'S2', ini: '10:45', fim: '12:30', min: 105,
+          cad: '✍️ SÁBADO — TREINO DE QUESTÕES DISCURSIVAS & PEÇA TÉCNICA',
+          disc: 'Elaboração de Peça Prática / Discursiva no Padrão AOCP',
+          it: 'Produção textual, fundamentação jurídica e correção por IA (0-100 pts)',
+          cods: 'DISC-AOCP', prio: 'MÁXIMA. AOCP', isSpecial: true, tagColor: 'var(--cyan)'
+        },
+        {
+          bl: 'S3', ini: '14:00', fim: '16:30', min: 150,
+          cad: '🔁 SÁBADO — REVISÃO GERAL (Parte 2) & ANÁLISE DE GARGALOS DE ERROS',
+          disc: 'Revisão da Matéria de Sexta + Correção de Pontos Fracos da Semana',
+          it: 'Repetição nos itens com baixo aproveitamento ou múltiplos adiamentos',
+          cods: 'GARGALOS', prio: 'ALTA', isSpecial: true, tagColor: 'var(--sun)'
+        }
+      ];
+    } else if (dayOfWeek === 0) { // DOMINGO: SIMULADO & BATERIA INTENSIVA DE QUESTÕES
+      dayBlocks = [
+        {
+          bl: 'D1', ini: '08:00', fim: '12:00', min: 240,
+          cad: '📝 DOMINGO — SIMULADO COMPLETO INÉDITO AOCP',
+          disc: '80 Questões Objetivas + 1 Peça Técnica Discursiva',
+          it: 'Treino de tempo de prova sob pressão real do edital PCBA',
+          cods: 'SIMULADO', prio: 'MÁXIMA. AOCP', isSpecial: true, tagColor: 'var(--mint)'
+        },
+        {
+          bl: 'D2', ini: '14:00', fim: '17:00', min: 180,
+          cad: '🔍 DOMINGO — CORREÇÃO INTEGRAL, CADERNO DE ERROS & BATERIA',
+          disc: 'Análise de Gabarito Comentado e Registro de Fundamentos de Erros',
+          it: 'Análise item por item e treino complementar nas matérias deficitárias',
+          cods: 'CADERNO-ERROS', prio: 'ALTA', isSpecial: true, tagColor: 'var(--mint)'
+        }
+      ];
+    } else { // DIAS ÚTEIS (SEGUNDA A SEXTA)
+      const rawTheory = byDate[d] || [];
+      const bA = rawTheory[0] ? { ...rawTheory[0], bl: 'A', ini: '04:00', fim: '06:00', min: 120 } : null;
+      const bB = rawTheory[1] ? { ...rawTheory[1], bl: 'B', ini: '06:00', fim: '08:00', min: 120 } : null;
+
+      const activeToday = [bA, bB].filter(Boolean);
+      const todayCads = [...new Set(activeToday.map(t => t.cad))];
+      const todayDiscs = [...new Set(activeToday.map(t => t.disc))];
+      const todayIts = [...new Set(activeToday.map(t => t.it))];
+      const todayCods = activeToday.map(t => t.cods).filter(Boolean).join(', ');
+
+      const prevDay = addDays(d, -1);
+      const theoryPrev = (byDate[prevDay] || []);
+      const activePrev = theoryPrev.length ? theoryPrev : (DS.plano.slice(0, 2).map((b,i)=>planTask(i)));
+
+      const prevCads = [...new Set(activePrev.map(t => t.cad))];
+      const prevDiscs = [...new Set(activePrev.map(t => t.disc))];
+      const prevIts = [...new Set(activePrev.map(t => t.it))];
+      const prevCods = activePrev.map(t => t.cods).filter(Boolean).join(', ');
+
+      const bC = {
+        id: 'crono_C_' + d,
+        bl: 'C', ini: '18:00', fim: '19:30', min: 90,
+        cad: '🔁 NOITE: REVISÃO D+1: ' + (prevCads.join(' & ') || 'Matéria Anterior'),
+        disc: prevDiscs.join(' · ') || 'Revisão D+1 da Matéria Anterior',
+        it: 'Assuntos a revisar: ' + (prevIts.join('; ') || 'Conceitos-chave'),
+        cods: prevCods || 'REV-D1',
+        prio: 'MÁXIMA. AOCP', isNight: true
+      };
+
+      const bD = {
+        id: 'crono_D_' + d,
+        bl: 'D', ini: '19:30', fim: '21:00', min: 90,
+        cad: '🎯 NOITE: BATERIA DE EXERCÍCIOS AOCP: ' + (todayCads.join(' & ') || 'Matérias do Dia'),
+        disc: todayDiscs.join(' · ') || 'Noções Gerais',
+        it: 'Assuntos dos exercícios: ' + (todayIts.join('; ') || 'Tópicos da manhã'),
+        cods: todayCods || 'EX-DIA',
+        prio: 'MÁXIMA. AOCP', isNight: true
+      };
+
+      dayBlocks = [bA, bB, bC, bD].filter(Boolean);
+    }
+
+    const load = dayBlocks.reduce((a,b)=>a+b.min,0);
+
+    html+=`<div class="card" style="${isToday?'border-color:var(--cyan);background:rgba(14,165,233,0.03)':''}">
       <div class="row" style="margin-bottom:12px">
-        <div><span class="eyebrow">${WD[dow(d)]}</span> <b class="mono" style="font-size:15px;margin-left:6px">${fmtBR(d)}</b> ${isToday?'<span class="tag media">hoje</span>':''}</div>
+        <div><span class="eyebrow">${WD[dayOfWeek]}</span> <b class="mono" style="font-size:15px;margin-left:6px">${fmtBR(d)}</b> ${isToday?'<span class="tag media">hoje</span>':''}</div>
         <div class="spacer"></div>
-        <span class="muted mono" style="color:${load>S.config.capDia?'var(--ember)':'var(--muted)'}">${load}/${S.config.capDia} min</span>
+        <span class="muted mono" style="color:var(--sun);font-weight:700">${load} min planejados</span>
       </div>
-      ${arr.map(t=>{const bl=S.config.blocos.find(x=>x.id===t.bl)||{ini:t.ini};const codes=blockDicas(t);
-        return `<div class="blk ${DONE(t.status)?'done':''}" style="margin-bottom:9px">
-          <div class="slot"><div class="lt">${t.bl}</div><div class="tm mono">${bl.ini}</div><div class="mn mono">${t.min}min</div></div>
-          <div class="body"><div class="row" style="gap:8px;flex-wrap:wrap"><span class="cad">${esc(t.cad)}</span>${tagP(t.prio)}<span class="faint" style="font-size:11px">${esc(t.fase)}</span></div>
-          <div class="meta">${esc(t.it)}</div>
-          <div class="codes">${codes.map(c=>`<span class="code ${S.dicas[c]?.status==='Concluído'?'done':''}" title="${esc(DICAMAP[c]?.t||'')}">${c}</span>`).join('')}</div></div>
-          <div class="act">${statusSelect(t.id,t.status)}<button class="btn sm ghost" data-open="reg" data-id="${t.id}">Registrar</button></div>
-        </div>`;}).join('')}
+      ${dayBlocks.map(t=>{
+        const isNight = t.isNight || t.bl === 'C' || t.bl === 'D';
+        const isSpecial = t.isSpecial;
+        const codes = t.cods ? t.cods.split(',') : [];
+        return `<div class="blk ${DONE(t.status)?'done':''}" style="margin-bottom:9px;border-left:4px solid ${isSpecial?(t.tagColor||'var(--cyan)'):isNight?'var(--sun)':'var(--mint)'}">
+          <div class="slot"><div class="lt">${t.bl}</div><div class="tm mono">${t.ini}–${t.fim}</div><div class="mn mono">${t.min}min</div></div>
+          <div class="body">
+            <div class="row" style="gap:8px;flex-wrap:wrap">
+              <span class="cad" style="font-weight:700">${esc(t.cad)}</span>
+              ${tagP(t.prio)}
+            </div>
+            <div class="meta" style="margin-top:4px">${esc(t.disc)} · ${esc(t.it)}</div>
+            ${codes.length ? `<div class="codes" style="margin-top:6px">${codes.map(c=>`<span class="code">${esc(c.trim())}</span>`).join('')}</div>` : ''}
+          </div>
+          <div class="act">
+            ${statusSelect(t.id || ('task_' + d + '_' + t.bl), t.status || 'Não iniciado')}
+            <button class="btn sm ghost" data-open="reg" data-id="${t.id || ('task_' + d + '_' + t.bl)}">Registrar</button>
+          </div>
+        </div>`;
+      }).join('')}
     </div>`;
   }
   html+=`</div>`;
-  if(!dates.length)html+=`<div class="card muted">Nenhum bloco com esses filtros.</div>`;
   return html;
 }
 
