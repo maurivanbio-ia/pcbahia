@@ -219,6 +219,12 @@ tr:hover td{background:rgba(255,255,255,.015)}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .hide{display:none!important}
+
+body.zen-mode aside { display: none !important; }
+body.zen-mode main { margin-left: 0 !important; width: 100% !important; max-width: 100% !important; padding: 20px 40px !important; }
+body.zen-mode .zen-hide { display: none !important; }
+body.zen-mode .brand { display: flex !important; }
+
 </style>
 </head>
 <body>
@@ -466,15 +472,32 @@ let pomodoroTimer = null;
 let pomodoroSeconds = 0;
 let pomodoroActiveId = null;
 
+
+function playBeep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.5);
+    osc.stop(ctx.currentTime + 0.5);
+  } catch(e) {}
+}
+
 function startPomodoro(id, minutes){
-  if (pomodoroTimer) clearInterval(pomodoroTimer);
+  if (pomodoroTimer) clearInterval(pomodoroTimer); playBeep();
   pomodoroActiveId = id;
   pomodoroSeconds = minutes * 60;
   pomodoroTimer = setInterval(() => {
     pomodoroSeconds--;
     updatePomodoroDisplay();
     if (pomodoroSeconds <= 0) {
-      clearInterval(pomodoroTimer);
+      clearInterval(pomodoroTimer); playBeep();
       pomodoroTimer = null;
       playBeepSound();
       toast('⏰ Pomodoro concluído! Registre o bloco.');
@@ -486,7 +509,7 @@ function startPomodoro(id, minutes){
 }
 
 function pausePomodoro(){
-  if (pomodoroTimer) { clearInterval(pomodoroTimer); pomodoroTimer = null; toast('⏸️ Pomodoro pausado'); render(); }
+  if (pomodoroTimer) { clearInterval(pomodoroTimer); playBeep(); pomodoroTimer = null; toast('⏸️ Pomodoro pausado'); render(); }
 }
 
 function updatePomodoroDisplay(){
@@ -1145,9 +1168,11 @@ function viewHoje(){
   // injetar blocos C e D baseados nas revisões/exercícios de hoje
   const rp=reprogram(ref,false);
   const night_blocks = [];
+  let hasC = false, hasD = false;
   rp.plan[ref]?.forEach(t => {
      if(t.assignedSlot === 'C' || t.assignedSlot === 'D') {
-         // This is a review/exercise block scheduled for today
+         if(t.assignedSlot === 'C') hasC = true;
+         if(t.assignedSlot === 'D') hasD = true;
          const parent = tget(t.parent);
          night_blocks.push({
              id: t.id, status: t.status, bl: t.assignedSlot, 
@@ -1160,6 +1185,13 @@ function viewHoje(){
          });
      }
   });
+  
+  if(!hasC && ref === TODAY() && dow(ref) > 0 && dow(ref) < 6) {
+      night_blocks.push({id: 'PLACEHOLDER-C', status: 'Não iniciado', bl: 'C', ini: "18:00", fim: "19:30", min: 90, date: ref, cad: 'REVISÃO LIVRE (Sem Pêndencias)', disc: 'Aguardando aulas para gerar revisões', it: 'Nenhuma revisão D+1/D+7/D+30 programada pelo algoritmo.', prio: 'Média'});
+  }
+  if(!hasD && ref === TODAY() && dow(ref) > 0 && dow(ref) < 6) {
+      night_blocks.push({id: 'PLACEHOLDER-D', status: 'Não iniciado', bl: 'D', ini: "19:30", fim: "21:00", min: 90, date: ref, cad: 'EXERCÍCIOS E FLUXO (Prática)', disc: 'Pratique o que estudou de manhã', it: 'Exercícios livres sobre os assuntos da manhã.', prio: 'Média'});
+  }
   
   night_blocks.forEach(nb => hoje.push(nb));
   hoje.sort((a,b)=>({A:0,B:1,C:2,D:3}[a.bl]-{A:0,B:1,C:2,D:3}[b.bl]));
