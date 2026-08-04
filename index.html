@@ -829,9 +829,53 @@ function viewHoje(){
   const qDia = getDailyQuestions(ref);
   const qSem = getWeeklyQuestions(ref);
 
-  // blocos de hoje (plano)
-  const hoje=[];DS.plano.forEach((b,i)=>{const t=planTask(i);if(t.date===ref)hoje.push(t);});
-  hoje.sort((a,b)=>({A:0,B:1,C:2,D:3,E:4}[a.bl]-{A:0,B:1,C:2,D:3,E:4}[b.bl]));
+  // 1. Manhã: Apenas 2 matérias teóricas novas por dia (Bloco A: 04:00-06:00 e Bloco B: 06:00-08:00)
+  const allTheoryToday = [];
+  DS.plano.forEach((b, i) => {
+    const t = planTask(i);
+    if (t.date === ref) allTheoryToday.push(t);
+  });
+  
+  const bA = allTheoryToday[0] ? { ...allTheoryToday[0], bl: 'A', ini: '04:00', fim: '06:00', min: 120, isNight: false } : null;
+  const bB = allTheoryToday[1] ? { ...allTheoryToday[1], bl: 'B', ini: '06:00', fim: '08:00', min: 120, isNight: false } : null;
+
+  // 2. Noite: Revisão D+1 da matéria do dia anterior + Bateria de Exercícios (18:00-21:00 - Sem Aulas)
+  const prevDay = addDays(ref, -1);
+  const prevDiscs = [];
+  DS.plano.forEach((b, i) => {
+    const t = planTask(i);
+    if (t.date === prevDay || t.u.dataReal === prevDay) prevDiscs.push(t.disc || t.cad);
+  });
+  const prevDiscLabel = [...new Set(prevDiscs)].join(', ') || 'Matérias do Dia Anterior';
+
+  const bC = {
+    id: 'night_C_' + ref,
+    kind: 'night_block',
+    bl: 'C', ini: '18:00', fim: '19:30', min: 90,
+    cad: '🔁 REVISÃO D+1 & QUESTÕES (' + prevDiscLabel + ')',
+    disc: 'Revisão D+1 das Matérias Estudadas Ontem',
+    it: 'Fixação e Resolução de Questões AOCP',
+    met: 'Revisar os tópicos da matéria anterior e resolver no mínimo 25 questões. Nenhuma aula.',
+    prio: 'MÁXIMA. AOCP',
+    isNight: true,
+    status: (S.nightStatus && S.nightStatus[ref + '_C']) || 'Não iniciado'
+  };
+
+  const bD = {
+    id: 'night_D_' + ref,
+    kind: 'night_block',
+    bl: 'D', ini: '19:30', fim: '21:00', min: 90,
+    cad: '🎯 BATERIA DE EXERCÍCIOS AOCP & REVISÕES (SEM AULAS)',
+    disc: 'Resolução Intensiva de Exercícios das Matérias do Dia',
+    it: 'Treino Prático com 25+ Questões AOCP + Fluxo D+7/D+30',
+    met: 'Foco 100% em questões e análise dos comentários de erros. Nenhuma aula.',
+    prio: 'MÁXIMA. AOCP',
+    isNight: true,
+    status: (S.nightStatus && S.nightStatus[ref + '_D']) || 'Não iniciado'
+  };
+
+  const hoje = [bA, bB, bC, bD].filter(Boolean);
+
   const revsHoje=reviewsList().filter(r=>['Pendente','Adiada'].includes(r.status)&&(r.plannedDate===ref||r.prev===ref));
   const revsVenc=reviewsList().filter(r=>revVenc(r,ref));
   const pend=[];DS.plano.forEach((b,i)=>{const t=planTask(i);if(!DONE(t.status)&&t.date<ref)pend.push(t);});
@@ -844,25 +888,27 @@ function viewHoje(){
   const q=(n,body)=>`<div class="card"><div class="eyebrow">${n}</div><div style="margin-top:12px">${body}</div></div>`;
 
   const blkHtml=t=>{
-    const bl=S.config.blocos.find(x=>x.id===t.bl)||{ini:t.ini,fim:t.fim,turno:''};
-    const codes=blockDicas(t);
-    const isPomoActive = pomodoroActiveId === t.id;
-    const isNight = t.bl === 'D' || t.bl === 'E';
+    const isNight = t.isNight || t.bl === 'C' || t.bl === 'D';
     const turnBadge = isNight 
-      ? (t.bl === 'D' ? '🌙 Noite: 🔁 Revisão D+1 (Matéria Anterior) & Questões' : '🌙 Noite: 🎯 Bateria de Exercícios & Fluxo D+7/D+30')
-      : '☀️ Manhã: Teoria & Aulas';
-    const qMeta = isNight ? '🎯 Meta: 25+ questões' : '🎯 Meta: 10+ questões';
+      ? (t.bl === 'C' ? '🌙 NOITE: 🔁 REVISÃO D+1 (MATÉRIA ANTERIOR) & QUESTÕES (SEM AULAS)' : '🌙 NOITE: 🎯 BATERIA DE EXERCÍCIOS AOCP & FLUXO D+7/D+30 (SEM AULAS)')
+      : '☀️ MANHÃ: TEORIA & AULAS (MATÉRIA DO DIA)';
+    const qMeta = isNight ? '🎯 Meta: 25+ Questões AOCP' : '🎯 Meta: 10+ Questões Fixação';
+    const isPomoActive = pomodoroActiveId === t.id;
 
-    return `<div class="blk ${DONE(t.status)?'done':''}" style="${isNight?'border-left:4px solid var(--sun);':''}">
-      <div class="slot"><div class="lt">${t.bl}</div><div class="tm mono">${bl.ini}</div><div class="mn mono">${t.min}min</div></div>
+    return `<div class="blk ${DONE(t.status)?'done':''}" style="border-left:5px solid ${isNight?'var(--sun)':'var(--mint)'}">
+      <div class="slot">
+        <div class="lt">${t.bl}</div>
+        <div class="tm mono">${t.ini}–${t.fim}</div>
+        <div class="mn mono">${t.min}min</div>
+      </div>
       <div class="body">
         <div class="row" style="gap:8px;flex-wrap:wrap">
-          <span class="cad">${esc(t.cad)}</span>${tagP(t.prio)}
-          <span class="tag" style="background:var(--panel2);color:${isNight?'var(--sun)':'var(--mint)'}">${turnBadge}</span>
-          <span class="faint" style="font-size:11px;margin-left:auto">${qMeta}</span>
+          <span class="cad" style="font-weight:700">${esc(t.cad)}</span>${tagP(t.prio)}
+          <span class="tag" style="background:${isNight?'rgba(245,158,11,0.15)':'rgba(16,185,129,0.15)'};color:${isNight?'var(--sun)':'var(--mint)'};font-weight:700">${turnBadge}</span>
+          <span class="faint" style="font-size:11.5px;margin-left:auto;color:var(--sun);font-weight:700">${qMeta}</span>
         </div>
-        <div class="meta">${esc(t.disc)} · ${esc(t.it)}</div>
-        <div class="codes">${codes.map(c=>`<span class="code ${S.dicas[c]?.status==='Concluído'?'done':''}" title="${esc(DICAMAP[c]?.t||'')}">${c}</span>`).join('')}</div>
+        <div class="meta" style="margin-top:4px">${esc(t.disc)} · ${esc(t.it)}</div>
+        ${t.cods ? `<div class="codes" style="margin-top:6px">${t.cods.split(',').map(c=>`<span class="code">${esc(c.trim())}</span>`).join('')}</div>` : ''}
       </div>
       <div class="act" style="flex-direction:column;gap:4px">
         ${statusSelect(t.id,t.status)}
