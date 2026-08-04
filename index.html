@@ -839,36 +839,52 @@ function viewHoje(){
   const bA = allTheoryToday[0] ? { ...allTheoryToday[0], bl: 'A', ini: '04:00', fim: '06:00', min: 120, isNight: false } : null;
   const bB = allTheoryToday[1] ? { ...allTheoryToday[1], bl: 'B', ini: '06:00', fim: '08:00', min: 120, isNight: false } : null;
 
-  // 2. Noite: Revisão D+1 da matéria do dia anterior + Bateria de Exercícios (18:00-21:00 - Sem Aulas)
+  // 2. Extrai Matérias, Tópicos e Códigos da Manhã de Hoje (para o Bloco D - Exercícios AOCP)
+  const activeToday = [bA, bB].filter(Boolean);
+  const todayCads = [...new Set(activeToday.map(t => t.cad))];
+  const todayDiscs = [...new Set(activeToday.map(t => t.disc))];
+  const todayIts = [...new Set(activeToday.map(t => t.it))];
+  const todayCods = activeToday.map(t => t.cods).filter(Boolean).join(', ');
+
+  // 3. Extrai Matérias, Tópicos e Códigos do Dia Anterior (para o Bloco C - Revisão D+1)
   const prevDay = addDays(ref, -1);
-  const prevDiscs = [];
+  const theoryPrev = [];
   DS.plano.forEach((b, i) => {
     const t = planTask(i);
-    if (t.date === prevDay || t.u.dataReal === prevDay) prevDiscs.push(t.disc || t.cad);
+    if (t.date === prevDay || t.u.dataReal === prevDay) theoryPrev.push(t);
   });
-  const prevDiscLabel = [...new Set(prevDiscs)].join(', ') || 'Matérias do Dia Anterior';
+  const activePrev = theoryPrev.length ? theoryPrev : (DS.plano.slice(0, 2).map((b,i)=>planTask(i)));
 
+  const prevCads = [...new Set(activePrev.map(t => t.cad))];
+  const prevDiscs = [...new Set(activePrev.map(t => t.disc))];
+  const prevIts = [...new Set(activePrev.map(t => t.it))];
+  const prevCods = activePrev.map(t => t.cods).filter(Boolean).join(', ');
+
+  // Bloco C: Revisão D+1 da Matéria Anterior com assuntos detalhados
   const bC = {
     id: 'night_C_' + ref,
     kind: 'night_block',
     bl: 'C', ini: '18:00', fim: '19:30', min: 90,
-    cad: '🔁 REVISÃO D+1 & QUESTÕES (' + prevDiscLabel + ')',
-    disc: 'Revisão D+1 das Matérias Estudadas Ontem',
-    it: 'Fixação e Resolução de Questões AOCP',
-    met: 'Revisar os tópicos da matéria anterior e resolver no mínimo 25 questões. Nenhuma aula.',
+    cad: '🔁 REVISÃO D+1: ' + (prevCads.join(' & ') || 'Matéria Anterior'),
+    disc: prevDiscs.join(' · ') || 'Revisão D+1 da Matéria Anterior',
+    it: 'Assuntos a revisar: ' + (prevIts.join('; ') || 'Pontos fracos e conceitos-chave'),
+    cods: prevCods || 'REV-D1',
+    met: 'Revisar os conceitos da matéria anterior sem consulta e resolver 25+ questões AOCP dos assuntos indicados acima. Nenhuma aula.',
     prio: 'MÁXIMA. AOCP',
     isNight: true,
     status: (S.nightStatus && S.nightStatus[ref + '_C']) || 'Não iniciado'
   };
 
+  // Bloco D: Bateria de Exercícios das Matérias do Dia com assuntos detalhados
   const bD = {
     id: 'night_D_' + ref,
     kind: 'night_block',
     bl: 'D', ini: '19:30', fim: '21:00', min: 90,
-    cad: '🎯 BATERIA DE EXERCÍCIOS AOCP & REVISÕES (SEM AULAS)',
-    disc: 'Resolução Intensiva de Exercícios das Matérias do Dia',
-    it: 'Treino Prático com 25+ Questões AOCP + Fluxo D+7/D+30',
-    met: 'Foco 100% em questões e análise dos comentários de erros. Nenhuma aula.',
+    cad: '🎯 BATERIA DE EXERCÍCIOS AOCP: ' + (todayCads.join(' & ') || 'Matérias de Hoje'),
+    disc: todayDiscs.join(' · ') || 'Matérias Estudadas Hoje de Manhã',
+    it: 'Assuntos dos exercícios: ' + (todayIts.join('; ') || 'Tópicos estudados hoje de manhã'),
+    cods: todayCods || 'EX-DIA',
+    met: 'Treino intensivo resolvendo 25+ questões AOCP focando exatamente nos tópicos e códigos estudados hoje de manhã. Nenhuma aula.',
     prio: 'MÁXIMA. AOCP',
     isNight: true,
     status: (S.nightStatus && S.nightStatus[ref + '_D']) || 'Não iniciado'
