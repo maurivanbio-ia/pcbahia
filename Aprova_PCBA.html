@@ -269,6 +269,7 @@ const DEFAULT_CONFIG = {
 const $=(s,r=document)=>r.querySelector(s);
 const pad=n=>String(n).padStart(2,'0');
 const todayISO=()=>{const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;};
+const TODAY=()=>todayISO();
 const parseISO=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);};
 const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const addDays=(s,n)=>{const d=parseISO(s);d.setDate(d.getDate()+n);return iso(d);};
@@ -976,6 +977,7 @@ const TODAY=()=>S.config.refDate||todayISO();
    RENDER
    =================================================================== */
 const IC={
+  chart:'M18 20V10M12 20V4M6 20v-6',
   hoje:'M4 13a8 8 0 0116 0M12 3v2M3 13h1m16 0h1M6 6l1 1m10-1l-1 1M8 20h8', // sol
   crono:'M4 5h16v15H4zM4 9h16M8 3v4m8-4v4',
   rev:'M4 4v6h6M20 20v-6h-6M20 8a8 8 0 00-14-3M4 16a8 8 0 0014 3',
@@ -989,6 +991,7 @@ const IC={
 };
 const svg=p=>`<svg class="ic" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${p}"/></svg>`;
 const VIEWS=[
+  {id:'indicadores',t:'Indicadores',eye:'Métricas de Desempenho & Horas Líquidas',ic:IC.chart},
   {id:'hoje',t:'Hoje',eye:'Painel diário',ic:IC.hoje},
   {id:'crono',t:'Cronograma',eye:'Blocos 04:00–08:00',ic:IC.crono},
   {id:'rev',t:'Revisões',eye:'D+1 · D+7 · D+30',ic:IC.rev},
@@ -1000,7 +1003,7 @@ const VIEWS=[
   {id:'reprog',t:'Reprogramar',eye:'Motor de planejamento',ic:IC.reprog},
   {id:'ajustes',t:'Ajustes',eye:'Concurso · calendário',ic:IC.ajustes},
 ];
-let ROUTE='hoje';
+let ROUTE='indicadores';
 
 function tagP(p){const m={'MÁXIMA. AOCP':'max','ALTA':'alta','MÉDIA':'media','BAIXA':'baixa'};
   return `<span class="tag ${m[p]||'baixa'}">${esc(p)}</span>`;}
@@ -1730,13 +1733,249 @@ function modalIACorrigirDiscursiva(discIdx) {
   </div>`);
 }
 
+/* ================= Cronômetro de Estudo Líquido ================= */
+let LIQUID_TIMER = { running: false, taskId: null, elapsedSec: 0, intervalId: null, startTime: null };
+
+function formatSecToHHMMSS(sec) {
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = sec % 60;
+  return `${pad(h)}h ${pad(m)}m ${pad(s)}s`;
+}
+
+function formatSecToHHMM(sec) {
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  return `${h}h ${pad(m)}m`;
+}
+
+function toggleLiquidTimer(taskId = null) {
+  if (LIQUID_TIMER.running) {
+    pauseLiquidTimer();
+  } else {
+    startLiquidTimer(taskId);
+  }
+}
+
+function startLiquidTimer(taskId = null) {
+  if (LIQUID_TIMER.running) return;
+  LIQUID_TIMER.running = true;
+  LIQUID_TIMER.taskId = taskId;
+  LIQUID_TIMER.startTime = Date.now() - (LIQUID_TIMER.elapsedSec * 1000);
+  LIQUID_TIMER.intervalId = setInterval(() => {
+    LIQUID_TIMER.elapsedSec = Math.floor((Date.now() - LIQUID_TIMER.startTime) / 1000);
+    const el = $('#liquidTimerBarDisplay');
+    if (el) el.textContent = formatSecToHHMMSS(LIQUID_TIMER.elapsedSec);
+  }, 1000);
+  toast('⏱️ Cronômetro de Estudo Líquido INICIADO!');
+  render();
+}
+
+function pauseLiquidTimer() {
+  if (!LIQUID_TIMER.running) return;
+  LIQUID_TIMER.running = false;
+  clearInterval(LIQUID_TIMER.intervalId);
+  toast('⏸️ Estudo Líquido PAUSADO');
+  render();
+}
+
+function stopLiquidTimer() {
+  if (LIQUID_TIMER.running) pauseLiquidTimer();
+  const sec = LIQUID_TIMER.elapsedSec;
+  if (sec > 0) {
+    const today = TODAY();
+    S.liquidSec = S.liquidSec || {};
+    S.liquidSec[today] = (S.liquidSec[today] || 0) + sec;
+    
+    if (LIQUID_TIMER.taskId) {
+      const u = tu(LIQUID_TIMER.taskId);
+      u.secLiquidos = (u.secLiquidos || 0) + sec;
+      u.horas = parseFloat(((u.secLiquidos || 0) / 3600).toFixed(2));
+    }
+    save();
+    toast(`⏹️ ${formatSecToHHMMSS(sec)} de Estudo Líquido registrados!`);
+  }
+  LIQUID_TIMER.elapsedSec = 0;
+  LIQUID_TIMER.taskId = null;
+  render();
+}
+
+function getLiquidSecondsDay(ref) {
+  S.liquidSec = S.liquidSec || {};
+  let sec = S.liquidSec[ref] || 0;
+  DS.plano.forEach((b, i) => {
+    const t = planTask(i);
+    if (t.u.dataReal === ref && t.u.secLiquidos) sec += t.u.secLiquidos;
+    else if (t.u.dataReal === ref && t.u.horas && !t.u.secLiquidos) sec += Math.round(t.u.horas * 3600);
+  });
+  return sec;
+}
+
+function getLiquidSecondsWeek(ref) {
+  const wk = weekKey(ref);
+  let sec = 0;
+  const days = availableWeekdays(ref);
+  for (const d of days) {
+    if (weekKey(d) === wk) {
+      sec += getLiquidSecondsDay(d);
+    }
+  }
+  return sec;
+}
+
+function getLiquidSecondsTotal() {
+  S.liquidSec = S.liquidSec || {};
+  let total = Object.values(S.liquidSec).reduce((a, b) => a + b, 0);
+  DS.plano.forEach((b, i) => {
+    const t = planTask(i);
+    if (t.u.secLiquidos) total += t.u.secLiquidos;
+    else if (t.u.horas && !t.u.secLiquidos) total += Math.round(t.u.horas * 3600);
+  });
+  return total;
+}
+
+/* ================= Aba Indicadores (1ª Aba do Menu) ================= */
+function viewIndicadores() {
+  const ref = TODAY();
+  const st = stats();
+  const proj = calculateProjectedScore();
+  const qDia = getDailyQuestions(ref);
+  const qSem = getWeeklyQuestions(ref);
+  
+  const secHoje = getLiquidSecondsDay(ref);
+  const liqSem = getLiquidSecondsWeek(ref);
+  const liqTot = getLiquidSecondsTotal();
+
+  // Desempenho por disciplina
+  const discStats = {};
+  DS.plano.forEach((b, i) => {
+    const t = planTask(i);
+    const dName = t.disc;
+    discStats[dName] = discStats[dName] || { disc: dName, done: 0, tot: 0, q: 0, ac: 0, secLiq: 0 };
+    const o = discStats[dName];
+    o.tot++;
+    if (DONE(t.status)) o.done++;
+    if (t.u.questoes) { o.q += t.u.questoes; o.ac += t.u.acertos; }
+    if (t.u.secLiquidos) o.secLiq += t.u.secLiquidos;
+    else if (t.u.horas) o.secLiq += Math.round(t.u.horas * 3600);
+  });
+
+  const discRows = Object.values(discStats).sort((a,b) => b.secLiq - a.secLiq);
+
+  // Discursivas
+  S.discursivas = S.discursivas || [];
+  const discCount = S.discursivas.length;
+  const discNotas = S.discursivas.filter(d => typeof d.nota === 'number').map(d => d.nota);
+  const discMedia = discNotas.length ? (discNotas.reduce((a,b)=>a+b,0)/discNotas.length).toFixed(1) : '—';
+
+  return `
+  <div class="grid" style="grid-template-columns:1fr;gap:18px">
+    <!-- Bar do Cronômetro de Estudo Líquido em Tempo Real -->
+    <div class="card" style="background:linear-gradient(135deg, rgba(35,42,60,0.9), rgba(18,22,34,0.95));border:1px solid var(--sun-dim)">
+      <div class="row" style="flex-wrap:wrap;gap:14px;align-items:center">
+        <div>
+          <div class="eyebrow" style="color:var(--sun)">⏱️ Contador de Horas Líquidas de Estudo</div>
+          <div style="font-size:28px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--sun);margin-top:2px" id="liquidTimerBarDisplay">
+            ${formatSecToHHMMSS(LIQUID_TIMER.elapsedSec)}
+          </div>
+        </div>
+        <div class="spacer"></div>
+        <div class="row" style="gap:8px">
+          <button class="btn ${LIQUID_TIMER.running?'sun':'primary'}" data-act="toggle-liquid-global">
+            ${LIQUID_TIMER.running ? '⏸️ Pausar Estudo' : '▶️ Iniciar Estudo Líquido'}
+          </button>
+          <button class="btn ember" data-act="stop-liquid-global">⏹️ Concluir &amp; Salvar Tempo</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Indicadores Principais -->
+    <div class="grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="pill-metric">
+        <div class="v mono" style="color:var(--mint)">${formatSecToHHMM(secHoje)}</div>
+        <div class="k">horas líquidas hoje</div>
+      </div>
+      <div class="pill-metric">
+        <div class="v mono" style="color:var(--sun)">${formatSecToHHMM(liqSem)}</div>
+        <div class="k">horas líquidas na semana</div>
+      </div>
+      <div class="pill-metric">
+        <div class="v mono" style="color:var(--cyan)">${formatSecToHHMM(liqTot)}</div>
+        <div class="k">total horas líquidas curso</div>
+      </div>
+      <div class="pill-metric">
+        <div class="v mono" style="color:var(--mint)">${proj.score} / ${proj.max}</div>
+        <div class="k">projeção de nota aocp</div>
+      </div>
+    </div>
+
+    <div class="grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="pill-metric">
+        <div class="v mono">${st.pct}%</div>
+        <div class="k">cobertura do edital</div>
+      </div>
+      <div class="pill-metric">
+        <div class="v mono" style="color:${qSem>=250?'var(--mint)':'var(--sun)'}">${qSem}/250</div>
+        <div class="k">meta semanal questões</div>
+      </div>
+      <div class="pill-metric">
+        <div class="v mono" style="color:${st.aprov!==null&&st.aprov<80?'var(--ember)':'var(--mint)'}">${st.aprov===null?'—':st.aprov+'%'}</div>
+        <div class="k">aproveitamento geral</div>
+      </div>
+      <div class="pill-metric">
+        <div class="v mono">${discMedia} pts</div>
+        <div class="k">média discursivas (${discCount} peças)</div>
+      </div>
+    </div>
+
+    <!-- Horas Líquidas por Disciplina -->
+    <div class="card">
+      <div class="eyebrow" style="margin-bottom:14px">📊 Distribuição de Horas Líquidas &amp; Questões por Disciplina</div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Disciplina</th>
+              <th>Horas Líquidas</th>
+              <th>Progresso Edital</th>
+              <th>Questões Resolvidas</th>
+              <th>Acertos (%)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${discRows.map(r => {
+              const ap = r.q ? Math.round(100 * r.ac / r.q) : null;
+              const pctEd = r.tot ? Math.round(100 * r.done / r.tot) : 0;
+              return `
+              <tr>
+                <td><b>${esc(r.disc)}</b></td>
+                <td class="mono" style="font-weight:700;color:var(--sun)">${formatSecToHHMM(r.secLiq)}</td>
+                <td>
+                  <div class="row" style="gap:8px">
+                    <div style="flex:1;background:var(--panel2);height:8px;border-radius:4px;overflow:hidden">
+                      <div style="width:${pctEd}%;background:var(--mint);height:100%"></div>
+                    </div>
+                    <span class="mono faint" style="font-size:11px">${pctEd}% (${r.done}/${r.tot})</span>
+                  </div>
+                </td>
+                <td class="mono">${r.q} questões</td>
+                <td class="mono" style="font-weight:700;color:${ap!==null&&ap<80?'var(--ember)':'var(--mint)'}">${ap!==null ? ap+'%' : '—'}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+}
+
 /* ================= render router ================= */
 function render(){
   const v=VIEWS.find(x=>x.id===ROUTE);
   $('#viewTitle').textContent=v.t;$('#viewEyebrow').textContent=v.eye;
   const dias=diffDays(TODAY(),S.config.provaDate);
   $('#diasProva').textContent=dias<0?'—':dias;
-  const map={hoje:viewHoje,crono:viewCrono,rev:viewRev,edital:viewEdital,dicas:viewDicas,caca:viewCacaQuestoes,discursiva:viewDiscursivas,fds:viewFds,reprog:viewReprog,ajustes:viewAjustes};
+  const map={indicadores:viewIndicadores,hoje:viewHoje,crono:viewCrono,rev:viewRev,edital:viewEdital,dicas:viewDicas,caca:viewCacaQuestoes,discursiva:viewDiscursivas,fds:viewFds,reprog:viewReprog,ajustes:viewAjustes};
   $('#view').innerHTML=map[ROUTE]();
   renderNav();
   $('#concursoSel').innerHTML=CONCURSOS.map(c=>`<option value="${c.id}" ${c.id===ACTIVE?'selected':''}>${esc(c.nome)}</option>`).join('');
@@ -1769,6 +2008,12 @@ document.addEventListener('click',async e=>{
     return;
   }
   const act=el.dataset.act;
+  if(act==='toggle-liquid-global'){
+    toggleLiquidTimer();
+  }
+  if(act==='stop-liquid-global'){
+    stopLiquidTimer();
+  }
   if(act==='edit-disc'){
     modalNovaDiscursiva(+el.dataset.idx);
   }
