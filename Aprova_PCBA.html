@@ -951,6 +951,7 @@ const IC={
   edital:'M6 3h9l4 4v14H6zM14 3v5h5M9 13h6M9 17h6',
   dicas:'M12 3l2.5 5 5.5.8-4 4 1 5.5L12 21l-5 2.8 1-5.5-4-4 5.5-.8z',
   caca:'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z',
+  discursiva:'M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z',
   fds:'M4 5h16v15H4zM4 9h16M16 3v4M8 3v4M9 15l2 2 4-4',
   reprog:'M3 12a9 9 0 019-9 9 9 0 018 5M21 12a9 9 0 01-9 9 9 9 0 01-8-5M17 8h4V4M7 16H3v4',
   ajustes:'M12 15a3 3 0 100-6 3 3 0 000 6zM19 12l1.5.9-1 2.6-1.8-.2-1.3 1.3.2 1.8-2.6 1-1-1.5h-1.8l-1 1.5-2.6-1 .2-1.8-1.3-1.3-1.8.2-1-2.6L5 12l-1.5-.9 1-2.6 1.8.2 1.3-1.3-.2-1.8 2.6-1 1 1.5h1.8l1-1.5 2.6 1-.2 1.8 1.3 1.3 1.8-.2 1 2.6z'
@@ -963,6 +964,7 @@ const VIEWS=[
   {id:'edital',t:'Cobertura do edital',eye:'Itens e lacunas',ic:IC.edital},
   {id:'dicas',t:'Dicas',eye:'Unidades atômicas',ic:IC.dicas},
   {id:'caca',t:'Caça-Questões',eye:'Filtro inteligente AOCP',ic:IC.caca},
+  {id:'discursiva',t:'Discursivas',eye:'Treino & Correção por IA',ic:IC.discursiva},
   {id:'fds',t:'Sábados & Domingos',eye:'Revisão · simulados',ic:IC.fds},
   {id:'reprog',t:'Reprogramar',eye:'Motor de planejamento',ic:IC.reprog},
   {id:'ajustes',t:'Ajustes',eye:'Concurso · calendário',ic:IC.ajustes},
@@ -1581,13 +1583,129 @@ function viewCacaQuestoes() {
   return html;
 }
 
+/* ---------- DISCURSIVAS ---------- */
+function viewDiscursivas() {
+  S.discursivas = S.discursivas || [];
+  const list = S.discursivas;
+  const notas = list.filter(d => typeof d.nota === 'number' && !isNaN(d.nota)).map(d => d.nota);
+  const media = notas.length ? (notas.reduce((a,b)=>a+b,0)/notas.length).toFixed(1) : '—';
+  
+  let html = `<div class="card" style="margin-bottom:16px">
+    <div class="row" style="flex-wrap:wrap;gap:12px">
+      <div class="pill-metric" style="flex:1;min-width:140px">
+        <div class="v mono" style="color:var(--mint)">${media} pts</div>
+        <div class="k">média das discursivas</div>
+      </div>
+      <div class="pill-metric" style="flex:1;min-width:140px">
+        <div class="v mono">${list.length}</div>
+        <div class="k">peças / questões registradas</div>
+      </div>
+      <div class="pill-metric" style="flex:1;min-width:140px">
+        <div class="v mono" style="color:var(--sun)">100 pts</div>
+        <div class="k">nota máxima aocp</div>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn sun sm" data-open="novadiscursiva">+ Cadastrar Peça / Discursiva</button>
+    </div>
+  </div>`;
+
+  if (!list.length) {
+    html += `<div class="card"><div class="muted">Nenhuma discursiva ou peça técnica cadastrada ainda. Clique no botão acima para adicionar sua primeira discursiva ou praticar com correção por IA!</div></div>`;
+    return html;
+  }
+
+  html += `<div class="card">
+    <div class="eyebrow" style="margin-bottom:12px">Histórico de Peças Práticas e Questões Discursivas</div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Título / Tema</th>
+            <th>Tipo</th>
+            <th>Nota Obtida</th>
+            <th>Feedback / Correção</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${list.map((d, idx) => `
+            <tr>
+              <td class="mono faint" style="font-size:12px">${fmtShort(d.data || TODAY())}</td>
+              <td><b>${esc(d.titulo)}</b>${d.enunciado ? `<div class="faint" style="font-size:11px;margin-top:2px">${esc(d.enunciado.substring(0, 60))}...</div>` : ''}</td>
+              <td><span class="tag alta">${esc(d.tipo || 'Peça Prática')}</span></td>
+              <td class="mono" style="font-size:15px;font-weight:700;color:${(d.nota||0)>=80?'var(--mint)':'var(--ember)'}">${d.nota !== null && d.nota !== undefined ? d.nota + ' / 100' : '—'}</td>
+              <td style="font-size:12px" class="muted">${esc(d.feedback ? d.feedback.substring(0, 80) + '...' : 'Sem feedback gravado.')}</td>
+              <td>
+                <div class="row" style="gap:6px">
+                  <button class="btn sm ghost" data-act="edit-disc" data-idx="${idx}">Editar</button>
+                  <button class="btn sm sun" data-act="ia-correct-disc" data-idx="${idx}">🤖 Correção IA</button>
+                  <button class="btn sm ember" data-act="del-disc" data-idx="${idx}">✕</button>
+                </div>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+
+  return html;
+}
+
+function modalNovaDiscursiva(editIdx = null) {
+  S.discursivas = S.discursivas || [];
+  const isEdit = editIdx !== null;
+  const d = isEdit ? S.discursivas[editIdx] : { titulo: '', tipo: 'Peça Prática', data: TODAY(), nota: '', maxNota: 100, enunciado: '', texto: '', feedback: '' };
+  
+  openModal(`<div class="mh"><h3>${isEdit ? 'Editar' : 'Nova'} Prática Discursiva</h3><button class="btn sm ghost" data-close>✕</button></div>
+  <div class="mb">
+    <div class="f2">
+      <div class="field"><label>Título / Tema da Peça</label><input type="text" id="dsTitulo" value="${esc(d.titulo)}" placeholder="ex: Representação por Prisão Preventiva"></div>
+      <div class="field"><label>Tipo</label>
+        <select id="dsTipo">
+          ${['Peça Prática', 'Questão Discursiva', 'Estudo de Caso', 'Portaria de IP'].map(t=>`<option ${d.tipo===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="f2">
+      <div class="field"><label>Data de Realização</label><input type="date" id="dsData" value="${d.data || TODAY()}"></div>
+      <div class="field"><label>Nota Obtida (0 a 100)</label><input type="number" step="0.5" id="dsNota" value="${d.nota ?? ''}" placeholder="ex: 85.5"></div>
+    </div>
+    <div class="field"><label>Enunciado / Caso Prático</label><textarea id="dsEnunciado" rows="3" placeholder="Cole o enunciado ou caso hipotético do treino...">${esc(d.enunciado||'')}</textarea></div>
+    <div class="field"><label>Sua Resposta / Texto Produzido</label><textarea id="dsTexto" rows="5" placeholder="Cole o texto da sua peça ou discursiva produzida...">${esc(d.texto||'')}</textarea></div>
+    <div class="field"><label>Feedback de Correção / Observações</label><textarea id="dsFeedback" rows="3" placeholder="Insira o feedback da correção ou parecer do professor/IA...">${esc(d.feedback||'')}</textarea></div>
+  </div>
+  <div class="mf">
+    ${isEdit ? `<button class="btn ember" data-act="del-disc" data-idx="${editIdx}">Excluir</button>` : ''}
+    <button class="btn ghost" data-close>Cancelar</button>
+    <button class="btn primary" data-act="save-disc" data-idx="${isEdit ? editIdx : ''}">Salvar Discursiva</button>
+  </div>`);
+}
+
+function modalIACorrigirDiscursiva(discIdx) {
+  S.discursivas = S.discursivas || [];
+  const d = S.discursivas[discIdx];
+  if (!d) return;
+  
+  openModal(`<div class="mh"><h3>🤖 Correção de Discursiva por IA (AOCP)</h3><button class="btn sm ghost" data-close>✕</button></div>
+  <div class="mb">
+    <div style="margin-bottom:12px"><b>Tema:</b> ${esc(d.titulo)} (${esc(d.tipo)})</div>
+    <div id="iaDiscRes" class="muted" style="min-height:120px;white-space:pre-wrap;font-family:'JetBrains Mono',monospace;font-size:12px">Clique no botão abaixo para que o Claude IA analise sua peça técnica segundo a norma culta, fundamentação jurídica e espelho de correção AOCP.</div>
+  </div>
+  <div class="mf">
+    <button class="btn ghost" data-close>Fechar</button>
+    <button class="btn sun" data-act="run-ia-disc" data-idx="${discIdx}">Executar Correção IA</button>
+  </div>`);
+}
+
 /* ================= render router ================= */
 function render(){
   const v=VIEWS.find(x=>x.id===ROUTE);
   $('#viewTitle').textContent=v.t;$('#viewEyebrow').textContent=v.eye;
   const dias=diffDays(TODAY(),S.config.provaDate);
   $('#diasProva').textContent=dias<0?'—':dias;
-  const map={hoje:viewHoje,crono:viewCrono,rev:viewRev,edital:viewEdital,dicas:viewDicas,caca:viewCacaQuestoes,fds:viewFds,reprog:viewReprog,ajustes:viewAjustes};
+  const map={hoje:viewHoje,crono:viewCrono,rev:viewRev,edital:viewEdital,dicas:viewDicas,caca:viewCacaQuestoes,discursiva:viewDiscursivas,fds:viewFds,reprog:viewReprog,ajustes:viewAjustes};
   $('#view').innerHTML=map[ROUTE]();
   renderNav();
   $('#concursoSel').innerHTML=CONCURSOS.map(c=>`<option value="${c.id}" ${c.id===ACTIVE?'selected':''}>${esc(c.nome)}</option>`).join('');
@@ -1616,9 +1734,61 @@ document.addEventListener('click',async e=>{
     if(el.dataset.open==='editdica')modalNovaDica(el.dataset.code);
     if(el.dataset.open==='simulado-import')modalImportarSimulado();
     if(el.dataset.open==='ia-questoes')modalIAQuestoes(el.dataset.code);
+    if(el.dataset.open==='novadiscursiva')modalNovaDiscursiva();
     return;
   }
   const act=el.dataset.act;
+  if(act==='edit-disc'){
+    modalNovaDiscursiva(+el.dataset.idx);
+  }
+  if(act==='ia-correct-disc'){
+    modalIACorrigirDiscursiva(+el.dataset.idx);
+  }
+  if(act==='save-disc'){
+    S.discursivas = S.discursivas || [];
+    const idx = el.dataset.idx;
+    const isEdit = idx !== '';
+    const item = {
+      titulo: $('#dsTitulo').value.trim(),
+      tipo: $('#dsTipo').value,
+      data: $('#dsData').value || TODAY(),
+      nota: $('#dsNota').value !== '' ? parseFloat($('#dsNota').value) : null,
+      enunciado: $('#dsEnunciado').value.trim(),
+      texto: $('#dsTexto').value.trim(),
+      feedback: $('#dsFeedback').value.trim()
+    };
+    if(!item.titulo){alert('Informe o título da peça ou discursiva.');return;}
+    if(isEdit){ S.discursivas[+idx] = Object.assign(S.discursivas[+idx], item); }
+    else{ S.discursivas.push(item); }
+    save();closeModal();toast(isEdit?'Discursiva atualizada':'Discursiva cadastrada');render();
+  }
+  if(act==='del-disc'){
+    const idx = +el.dataset.idx;
+    if(confirm('Excluir esta discursiva?')){
+      S.discursivas.splice(idx, 1);
+      save();closeModal();toast('Discursiva excluída');render();
+    }
+  }
+  if(act==='run-ia-disc'){
+    const idx = +el.dataset.idx;
+    const d = S.discursivas[idx];
+    const resEl = $('#iaDiscRes');
+    resEl.innerHTML = '<span class="faint">🤖 Analisando peça jurídica com Claude IA sob os critérios AOCP...</span>';
+    const prompt = `Você é um avaliador de discursivas e peças práticas da banca AOCP para a Polícia Civil. Avalie a seguinte peça/discursiva com base em 4 critérios: 1. Domínio Técnico/Jurídico (40 pts), 2. Norma Culta (20 pts), 3. Estrutura da Peça/Formalismo (20 pts), 4. Fundamentação Legal (20 pts). Forneça a nota final estimada de 0 a 100 e um parecer detalhado com pontos fortes e correções.\n\nTítulo: ${d.titulo}\nTipo: ${d.tipo}\nEnunciado: ${d.enunciado||'Não fornecido'}\n\nTexto do Aluno:\n${d.texto||'Sem texto fornecido'}`;
+    const resp = await callClaudeAPI(prompt);
+    if(resp){
+      resEl.innerHTML = `<div style="white-space:pre-wrap;font-size:12px">${esc(resp)}</div>`;
+      // Tentar extrair nota numérica da resposta da IA
+      const notaMatch = resp.match(/(?:nota\s*(?:final)?|pontuação)\s*:?\s*(\d+(?:\.\d+)?)/i);
+      if(notaMatch){
+        d.nota = parseFloat(notaMatch[1]);
+      }
+      d.feedback = resp;
+      save();render();
+    }else{
+      resEl.innerHTML = '<span style="color:var(--ember)">Erro ao realizar correção. Verifique sua chave de API nos Ajustes.</span>';
+    }
+  }
   if(act==='start-pomo'){
     startPomodoro(el.dataset.id, +el.dataset.min||25);
   }
