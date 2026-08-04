@@ -263,7 +263,7 @@ const DEFAULT_CONFIG = {
   revDur:{D1:45,D7:30,D30:30},
   bloqueios:[],          // {data:"YYYY-MM-DD", motivo:""}
   metaAprov:80,          // % mínimo por item
-  refDate:"2026-08-04"   // Início do estudo em 04/08/2026
+  refDate:"2026-08-05"   // Início efetivo oficial dos estudos em 05/08/2026 (Quarta-feira)
 };
 /* ================= util ================= */
 const $=(s,r=document)=>r.querySelector(s);
@@ -344,7 +344,7 @@ async function loadState(){
   // garante campos
   S.tasks=S.tasks||{};S.dicas=S.dicas||{};S.reviews=S.reviews||{};
   S.config=Object.assign(JSON.parse(JSON.stringify(DEFAULT_CONFIG)),S.config);
-  S.config.refDate=S.config.refDate||"2026-08-04";
+  S.config.refDate="2026-08-05";
   reprogram(S.config.refDate, true);
 }
 let saveT;
