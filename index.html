@@ -569,7 +569,17 @@ async function loadState(){
   else{S={config:JSON.parse(JSON.stringify(DEFAULT_CONFIG)),tasks:{},dicas:{},reviews:{},meta:{createdAt:new Date().toISOString()}};}
   // garante campos
   S.tasks=S.tasks||{};S.dicas=S.dicas||{};S.reviews=S.reviews||{};
-  S.discursivas=(S.discursivas&&S.discursivas.length)?S.discursivas:JSON.parse(JSON.stringify(TEMAS_DISCURSIVAS_AOCP));
+  // Sempre sincroniza S.discursivas com o array master (adiciona temas novos sem perder os já cadastrados pelo usuário)
+  const master = JSON.parse(JSON.stringify(TEMAS_DISCURSIVAS_AOCP));
+  const saved = S.discursivas || [];
+  if (saved.length < master.length) {
+    // Preserva entradas customizadas pelo usuário (por titulo), adiciona as que faltam do master
+    const byTitle = {};
+    saved.forEach(d => { byTitle[d.titulo] = d; });
+    S.discursivas = master.map(m => byTitle[m.titulo] ? { ...m, ...byTitle[m.titulo] } : m);
+  } else {
+    S.discursivas = saved.length ? saved : master;
+  }
   S.config=Object.assign(JSON.parse(JSON.stringify(DEFAULT_CONFIG)),S.config);
   S.config.refDate="2026-08-05";
   reprogram(S.config.refDate, true);
@@ -1458,7 +1468,7 @@ function viewCrono(){
   const allDates = [];
   let dCurr = startDate;
   let guard = 0;
-  while (dCurr <= endDate && guard < 180) {
+  while (dCurr < endDate && guard < 180) { // < estrito: o dia da prova NÃO é dia de estudo
     allDates.push(dCurr);
     dCurr = addDays(dCurr, 1);
     guard++;
