@@ -227,6 +227,15 @@ body.zen-mode .brand { display: flex !important; }
 
 </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <link rel="manifest" href="./manifest.json">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(err => console.error(err));
+    }
+  </script>
+
 </head>
 <body>
 <div class="app">
@@ -367,10 +376,14 @@ async function loadState(){
   const raw=await store.get('aprova:state:'+ACTIVE);
   if(raw&&raw.config){S=raw;
   if(!S.flashcards) S.flashcards = [];
+  if(!S.gamification) S.gamification = {xp: 0, level: 1};
+
 }
   else{S={config:JSON.parse(JSON.stringify(DEFAULT_CONFIG)),tasks:{},dicas:{},reviews:{},meta:{createdAt:new Date().toISOString()}};}
   
   if(!S.flashcards) S.flashcards = [];
+  if(!S.gamification) S.gamification = {xp: 0, level: 1};
+
 
   // garante campos
   S.tasks=S.tasks||{};S.dicas=S.dicas||{};S.reviews=S.reviews||{};
@@ -497,6 +510,28 @@ function playBeep() {
     gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.5);
     osc.stop(ctx.currentTime + 0.5);
   } catch(e) {}
+}
+
+
+function addXP(amount) {
+   S.gamification.xp += amount;
+   const newLevel = Math.floor(S.gamification.xp / 500) + 1;
+   if(newLevel > S.gamification.level) {
+       S.gamification.level = newLevel;
+       alert(`🎉 Você subiu para o Nível ${newLevel}! Parabéns!`);
+   }
+   save();
+   renderLevelBadge();
+}
+
+function renderLevelBadge() {
+   const b = document.getElementById('levelBadge');
+   if(b) {
+       let title = "Aspirante";
+       if(S.gamification.level >= 5) title = "Analista INEMA";
+       if(S.gamification.level >= 10) title = "Biólogo Master";
+       b.innerHTML = `🎖️ Lvl ${S.gamification.level} (${title}) - ${S.gamification.xp} XP`;
+   }
 }
 
 function startPomodoro(id, minutes){
@@ -2628,6 +2663,53 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 <div id="syncStatus" onclick="doSync()" style="position:fixed;bottom:20px;right:20px;background:var(--card);padding:12px 16px;border-radius:24px;box-shadow:0 4px 12px rgba(0,0,0,0.1);cursor:pointer;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;z-index:9999;border:1px solid var(--border);">
   <span id="syncIcon">☁️</span> <span id="syncText">Sincronizar Nuvem</span>
 </div>
+
+
+<div id="aiModal" style="display:none;position:fixed;top:10%;left:50%;transform:translate(-50%,0);width:90%;max-width:500px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px;z-index:99999;box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+   <h3>🤖 Dúvida com IA</h3>
+   <p id="aiContext" class="muted" style="font-size:12px;margin-bottom:12px;"></p>
+   <div id="aiHistory" style="max-height:300px;overflow-y:auto;margin-bottom:16px;font-size:14px;display:flex;flex-direction:column;gap:8px;"></div>
+   <input type="text" id="aiInput" placeholder="Faça sua pergunta..." style="width:100%;padding:10px;margin-bottom:10px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:4px;">
+   <div style="display:flex;justify-content:flex-end;gap:8px;">
+     <button class="btn ghost sm" onclick="document.getElementById('aiModal').style.display='none'">Fechar</button>
+     <button class="btn sm" onclick="sendAiQuery()">Enviar</button>
+   </div>
+</div>
+
+<script>
+let currentAiContext = "";
+function openAIChat(disc, topic) {
+   currentAiContext = `Assunto: ${disc} - ${topic}`;
+   document.getElementById('aiContext').innerText = currentAiContext;
+   document.getElementById('aiHistory').innerHTML = "";
+   document.getElementById('aiInput').value = "";
+   document.getElementById('aiModal').style.display = 'block';
+}
+async function sendAiQuery() {
+   const inp = document.getElementById('aiInput');
+   const text = inp.value.trim();
+   if(!text) return;
+   const hist = document.getElementById('aiHistory');
+   hist.innerHTML += `<div style="background:rgba(255,255,255,0.05);padding:8px;border-radius:4px;"><b>Você:</b> ${text}</div>`;
+   inp.value = '';
+   hist.innerHTML += `<div id="aiTyping" style="color:var(--mint);padding:8px;"><i>IA digitando...</i></div>`;
+   hist.scrollTop = hist.scrollHeight;
+   
+   const prompt = `Você é um professor particular preparatório para o concurso do INEMA/UFBA. Responda de forma direta e didática.
+Contexto do estudo atual: ${currentAiContext}.
+Pergunta do aluno: ${text}`;
+   
+   try {
+       const resp = await callOpenAIAPI(prompt);
+       document.getElementById('aiTyping').remove();
+       hist.innerHTML += `<div style="border-left:3px solid var(--mint);padding:8px 8px 8px 12px;background:rgba(92,203,160,0.1);"><b>IA:</b> ${resp}</div>`;
+       hist.scrollTop = hist.scrollHeight;
+   } catch(e) {
+       document.getElementById('aiTyping').remove();
+       hist.innerHTML += `<div style="color:red;padding:8px;">Erro na API OpenAI. Verifique sua chave.</div>`;
+   }
+}
+</script>
 
 </body>
 </html>
