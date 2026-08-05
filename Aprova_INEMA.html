@@ -226,12 +226,15 @@ body.zen-mode .zen-hide { display: none !important; }
 body.zen-mode .brand { display: flex !important; }
 
 </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 <div class="app">
   <aside class="side">
     <div class="brand"><div class="glyph"></div><div><b>Aprova INEMA</b><small>estudo · revisão · reprogramação</small></div></div>
-    <nav class="nav" id="nav"></nav>
+    <nav class="nav" id="nav"><a onclick="nav('discursiva')" id="m-discursiva" class="menu-item">✍️ Laboratório Discursiva</a>
+<a onclick="nav('flashcards')" id="m-flashcards" class="menu-item">🗂️ Flashcards (Anki)</a>
+</nav>
   </aside>
   <div class="main">
     <header class="topbar">
@@ -248,7 +251,9 @@ body.zen-mode .brand { display: flex !important; }
     <main class="content" id="view"></main>
   </div>
 </div>
-<nav class="mnav" id="mnav"></nav>
+<nav class="mnav" id="mnav"><a onclick="nav('discursiva')" id="m-discursiva" class="menu-item">✍️ Laboratório Discursiva</a>
+<a onclick="nav('flashcards')" id="m-flashcards" class="menu-item">🗂️ Flashcards (Anki)</a>
+</nav>
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
 <div class="toast" id="toast"></div>
 
@@ -360,8 +365,13 @@ async function loadState(){
   DS=CONCURSOS.find(c=>c.id===ACTIVE).data;
   buildDicaMap();
   const raw=await store.get('aprova:state:'+ACTIVE);
-  if(raw&&raw.config){S=raw;}
+  if(raw&&raw.config){S=raw;
+  if(!S.flashcards) S.flashcards = [];
+}
   else{S={config:JSON.parse(JSON.stringify(DEFAULT_CONFIG)),tasks:{},dicas:{},reviews:{},meta:{createdAt:new Date().toISOString()}};}
+  
+  if(!S.flashcards) S.flashcards = [];
+
   // garante campos
   S.tasks=S.tasks||{};S.dicas=S.dicas||{};S.reviews=S.reviews||{};
   // Sempre sincroniza S.discursivas com o array master (adiciona temas novos sem perder os já cadastrados pelo usuário)
@@ -2556,5 +2566,10 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
   if(!STORAGE_OK){toast('Modo sem persistência — use Exportar para salvar');}
 })();
 </script>
+
+<div id="syncStatus" onclick="doSync()" style="position:fixed;bottom:20px;right:20px;background:var(--card);padding:12px 16px;border-radius:24px;box-shadow:0 4px 12px rgba(0,0,0,0.1);cursor:pointer;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;z-index:9999;border:1px solid var(--border);">
+  <span id="syncIcon">☁️</span> <span id="syncText">Sincronizar Nuvem</span>
+</div>
+
 </body>
 </html>
