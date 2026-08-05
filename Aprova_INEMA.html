@@ -772,6 +772,44 @@ function reprogram(ref,persist=true){
   // REGRA SOLICITADA: Apenas 2 matérias/conteúdos por dia no período da manhã (Blocos A e B, 04h-08h)
   const theoryQueue = q.filter(it => it.kind === 'block');
   const reviewQueue = q.filter(it => it.kind === 'review');
+
+  let dynamicCapDia = config.capDia;
+  let alertMsg = "";
+  let warningLvl = 0;
+  
+  if(config.examDateINEMA && config.examDateINEMA >= ref) {
+      let d1 = new Date(ref + 'T00:00:00');
+      let d2 = new Date(config.examDateINEMA + 'T00:00:00');
+      let diffTime = Math.abs(d2 - d1);
+      let daysToExam = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      let workingDays = 0;
+      for(let i=0; i<=daysToExam; i++){
+          const checkD = new Date(ref + 'T00:00:00'); 
+          checkD.setDate(checkD.getDate()+i);
+          const dw = checkD.getDay();
+          if(config.skipFds && (dw===0||dw===6)) continue;
+          if(config.skipDom && dw===0) continue;
+          workingDays++;
+      }
+      
+      if(workingDays > 0) {
+          let pendingBlocks = theoryQueue.length;
+          let neededCap = Math.ceil(pendingBlocks / workingDays);
+          if(neededCap > dynamicCapDia) {
+              dynamicCapDia = Math.min(neededCap, 6); // Max 6 theory blocks a day
+              warningLvl = neededCap > 4 ? 2 : 1;
+              alertMsg = `Faltam ${workingDays} dias úteis p/ INEMA. Restam ${pendingBlocks} tópicos. Carga aumentada p/ ${dynamicCapDia} blocos de teoria/dia.`;
+              if(neededCap > 6) alertMsg += " (Impossível fechar sem horas extras. Foque na revisão!)";
+          } else {
+              alertMsg = `Faltam ${workingDays} dias úteis p/ INEMA. Carga de ${dynamicCapDia} blocos/dia é suficiente para fechar o edital.`;
+              warningLvl = 0;
+          }
+      }
+  }
+
+  const resultMeta = { plan: plan, scenarios: {}, alertMsg: alertMsg, warningLvl: warningLvl };
+
   
 
   // Aloca a fila tentando não repetir a mesma disciplina seguida
@@ -787,7 +825,7 @@ function reprogram(ref,persist=true){
       
       if (nextIdx !== -1) {
         const it = theoryQueue.splice(nextIdx, 1)[0];
-        it.assignedSlot = slotIdx === 0 ? 'A' : 'B';
+        it.assignedSlot = String.fromCharCode(65 + slotIdx);
         usedDiscs.add(it.disc);
         plan[d].push(it);
       }
@@ -964,6 +1002,15 @@ function viewHoje(){
   const below=belowTarget().slice(0,6);
   const rp=reprogram(ref,false);
   const prov=rp.scenarios[1];
+
+  let bannerHtml = '';
+  if(rp.alertMsg) {
+      const color = rp.warningLvl === 2 ? 'var(--ember)' : (rp.warningLvl === 1 ? 'var(--sun)' : 'var(--cyan)');
+      bannerHtml = `<div style="margin-bottom:24px; padding:16px; background:rgba(255,255,255,0.05); border-left:4px solid ${color}; border-radius:4px; font-weight:600;">
+         <span style="font-size:20px; margin-right:8px;">${rp.warningLvl>0 ? '⏳' : '✅'}</span> ${rp.alertMsg}
+      </div>`;
+  }
+
   const bottlenecks = detectBottlenecks();
 
   const sat=isWeekend(ref);
@@ -1215,6 +1262,15 @@ function viewHoje(){
   // viabilidade
   const rp=reprogram(ref,false);
   const prov=rp.scenarios[1];
+
+  let bannerHtml = '';
+  if(rp.alertMsg) {
+      const color = rp.warningLvl === 2 ? 'var(--ember)' : (rp.warningLvl === 1 ? 'var(--sun)' : 'var(--cyan)');
+      bannerHtml = `<div style="margin-bottom:24px; padding:16px; background:rgba(255,255,255,0.05); border-left:4px solid ${color}; border-radius:4px; font-weight:600;">
+         <span style="font-size:20px; margin-right:8px;">${rp.warningLvl>0 ? '⏳' : '✅'}</span> ${rp.alertMsg}
+      </div>`;
+  }
+
 
   const sat=isWeekend(ref);
   const q=(n,body)=>`<div class="card"><div class="eyebrow">${n}</div><div style="margin-top:12px">${body}</div></div>`;
@@ -2544,6 +2600,8 @@ document.addEventListener('change',async e=>{
     const k=el.dataset.cfg;const val=el.value;
     if(k==='concurso'){ACTIVE=val;await saveConcursos();await loadState();render();return;}
     if(k==='refDate'){S.config.refDate=val||null;}
+    if(k==='examDateINEMA'){S.config.examDateINEMA=val;}
+    if(k==='examDateUFBA'){S.config.examDateUFBA=val;}
     else if(['capDia','metaAprov'].includes(k)){S.config[k]=+val;}
     else if(k==='provaDate'){S.config.provaDate=val;}
     else if(k.startsWith('revD')){S.config.revDur[k.replace('rev','')]=+val;}
